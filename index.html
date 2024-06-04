@@ -184,151 +184,6 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://m1ntice.github.io/2024/06/04/Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="M1ntIce's Blog">
-      <meta itemprop="description" content="M1ntIce">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | M1ntIce's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/06/04/Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" class="post-title-link" itemprop="url">Java 动态代理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">Posted on</span>
-      
-
-      <time title="Created: 2024-06-04 21:06:20 / Modified: 21:07:46" itemprop="dateCreated datePublished" datetime="2024-06-04T21:06:20+08:00">2024-06-04</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="Word count in article">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">Word count in article: </span>
-      <span>5.2k</span>
-    </span>
-    <span class="post-meta-item" title="Reading time">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">Reading time &asymp;</span>
-      <span>5 mins.</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h3><p>代理模式是常见的一种java设计模式，特征是代理类和委托类实现了同样的接口，代理类主要负责委托类预处理，过滤，转发以及时候处理等等。</p>
-<p>实现代理模式常见的方法有：</p>
-<ul>
-<li>代理类关联目标对象，实现目标对象实现的接口</li>
-<li>代理类继承目标类，重写需要代理的方法</li>
-</ul>
-<h5 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h5><p>如果代理类在程序运行前就已经存在，那么这种代理方式被称为静态代理，在这种情况下的代理通常是Java代码之中定义的。</p>
-<p>静态代理的局限在运行前必须编写好代理类</p>
-<h5 id="动态代理"><a href="#动态代理" class="headerlink" title="动态代理"></a>动态代理</h5><p>代理类在<code>程序运行时创建的代理方式</code>被称为动态代理。也就是说，代理类并不是在Java代码之中定义的，而是在运行时根据在Java代码中的”指示”动态生成。</p>
-<hr>
-<p>如果为特定类的特定方法生成固定的代理，那么使用<code>静态代理</code>就可以较好地满足需求</p>
-<p>如果为大量不同类的不同方法生成代理，使用静态代理就需要编写大量的代理类，且大量代码冗余，此时使用动态代理是一个很好的选择。</p>
-<h2 id="Java-动态代理"><a href="#Java-动态代理" class="headerlink" title="Java 动态代理"></a>Java 动态代理</h2><p><code>Java</code>反射提供了一种类动态代理机制，可以通过代理接口实现类来完成程序无侵入式扩展。</p>
-<p>可以使用<code>Proxy.newProxyInstance()</code>来创建动态类实例，或者使用<code>Proxy.getProxyClass()</code>获取代理类对象的方式来创建</p>
-<h5 id="eg"><a href="#eg" class="headerlink" title="eg"></a>eg</h5><p><code>hungry.java</code>: 接口</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> dynamic_agent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">hungry</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">calllunch</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>roommate.java</code>: hungry接口的实现类，也就是委托类</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> dynamic_agent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">roommate</span> <span class="keyword">implements</span> <span class="title class_">hungry</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">roommate</span><span class="params">(String name)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">calllunch</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;call for lunch&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>roommate_invocation_handler.java</code></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> dynamic_agent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">roommate_invocation_handler</span>&lt;T&gt; <span class="keyword">implements</span> <span class="title class_">InvocationHandler</span>&#123;</span><br><span class="line">    <span class="comment">//InvocationHandler 是一个接口，是由实例内部的invocation handler实现的接口</span></span><br><span class="line">    <span class="keyword">private</span> T rommate;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">roommate_invocation_handler</span><span class="params">(T rommate)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.rommate = rommate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Looking forward coupons&quot;</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> method.invoke(rommate, args);</span><br><span class="line">        <span class="comment">//当代理实例上调用方法的时候，method.invoke(baseImp, args)这个方法将被编码并植入到代理实例内部的invocation handler 实现的invoke方法</span></span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//使用proxy的方式实现动态代理，调用委托类接口的方法，完成calllunch</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span>&#123;</span><br><span class="line">        <span class="type">roommate</span> <span class="variable">rm</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">roommate</span>(<span class="string">&quot;test1&quot;</span>);</span><br><span class="line">        <span class="type">hungry</span> <span class="variable">proxyInstancce</span> <span class="operator">=</span> (hungry) Proxy.newProxyInstance(</span><br><span class="line">            rm.getClass().getClassLoader(),<span class="comment">//指定动态代理类的类加载器</span></span><br><span class="line">            rm.getClass().getInterfaces(),<span class="comment">//定义动态代理生成的类实现的接口</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">roommate_invocation_handler</span>(rm));<span class="comment">//动态代理处理类</span></span><br><span class="line">        <span class="comment">//代理实例proxyInstancce的类型是hungry，所以只能调用hungry之中的方法，roommate作为接口实现类，不是来自接口的其他方法，是无法通过代理调用的</span></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">roommate_invocation_handler</span>(rm);</span><br><span class="line">        proxyInstancce.calllunch();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>运行结果：</p>
-<p><img src="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210418172003385.png" alt="image-20210418170029661"></p>
-<h4 id=""><a href="#" class="headerlink" title=""></a></h4><p>动态代理的实现原理</p>
-<p>从 <code>Proxy.newProxyInstance</code>入手，分析<code>InvocationHandler</code>如何建立代理实例和委托实例</p>
-<ul>
-<li>通过类加载器和委托类窗口，在内存中找出或者生成指定的代理类</li>
-</ul>
-<p><img src="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210418170029661.png"></p>
-<ul>
-<li>利用指定的invocation handler调用他的构造器方法，构造代理类的实例返回</li>
-</ul>
-<p><img src="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210418172245664.png" alt="image-20210418172245664"></p>
-<ul>
-<li><p>在上面的main代码中补充，利用<code>ProxyGenerator.generateProxyClass</code>生成这个动态生成的类文件，写入指定路径的class文件之中</p>
-<p>  这里需要注意的是，jdk的版本，如果直接引入<code>ProxyGenerator类</code>不能成功，需要改用<code>jdk8</code></p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] classFile = ProxyGenerator.generateProxyClass(<span class="string">&quot;$Proxy0&quot;</span>,Roommate.class.getInterfaces());</span><br><span class="line">        <span class="type">String</span> <span class="variable">filePath</span> <span class="operator">=</span> <span class="string">&quot;D:\Code\Java\proxy\src\dynamic_agent\roommateProxy.class&quot;</span>;</span><br><span class="line">        <span class="keyword">try</span>(<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(filePath)) &#123;</span><br><span class="line">            fos.write(classFile);</span><br><span class="line">            fos.flush();</span><br><span class="line">        &#125;<span class="keyword">catch</span> (IOException e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            System.out.println(<span class="string">&quot;error：写入文件&quot;</span>);</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>反编译这个class文件得到</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationHandler;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Proxy;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.UndeclaredThrowableException;</span><br><span class="line"><span class="keyword">import</span> dynamic_agent.hungry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">$Proxy0</span> <span class="keyword">extends</span> <span class="title class_">Proxy</span> <span class="keyword">implements</span> <span class="title class_">hungry</span>&#123;</span><br><span class="line">    <span class="comment">//在构建$Proxy0这个类，会调用父类Proxy的方法</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> Method m1;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> Method m3; <span class="comment">//由下方静态代码块得知，m3代表callLunch()这一个方法</span></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> Method m2;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> Method m0;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">  父类Proxy的构造器，其中 h 属性为 InvocationHandler引用</span></span><br><span class="line"><span class="comment">  protected Proxy(InvocationHandler h) &#123;</span></span><br><span class="line"><span class="comment">        Objects.requireNonNull(h);</span></span><br><span class="line"><span class="comment">        this.h = h;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  <span class="keyword">public</span> $Proxy0(</span><br><span class="line">      InvocationHandler paramInvocationHandler) <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>(paramInvocationHandler);</span><br><span class="line">  &#125;</span><br><span class="line"> <span class="comment">//可供外界调用，方法名与委托类实现接口的方法相同，利用 InvocationHandler调用invoke</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title function_">callLunch</span><span class="params">()</span> <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">      <span class="built_in">this</span>.h.invoke(<span class="built_in">this</span>, m3, <span class="literal">null</span>);</span><br><span class="line">        <span class="comment">//由于h属性其实是InvocationHandler引用，调用了他的invoke就会导致roommateInvocationHandler类的重写过的invoke方法也就被调用过了</span></span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (Error|RuntimeException localError)&#123;</span><br><span class="line">      <span class="keyword">throw</span> localError;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (Throwable localThrowable)&#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">UndeclaredThrowableException</span>(localThrowable);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">equals</span><span class="params">(Object paramObject)</span> <span class="keyword">throws</span> &#123;&#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">final</span> String <span class="title function_">toString</span><span class="params">()</span> <span class="keyword">throws</span> &#123;...&#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">final</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">()</span> <span class="keyword">throws</span> &#123;...&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">static</span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">      m1 = Class.forName(<span class="string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="string">&quot;equals&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[] &#123; Class.forName(<span class="string">&quot;java.lang.Object&quot;</span>) &#125;);</span><br><span class="line">      m3 = Class.forName(<span class="string">&quot;dynamic_agent.hungry&quot;</span>).getMethod(<span class="string">&quot;calllunch&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">      m2 = Class.forName(<span class="string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="string">&quot;toString&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">      m0 = Class.forName(<span class="string">&quot;java.lang.Object&quot;</span>).getMethod(<span class="string">&quot;hashCode&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (NoSuchMethodException localNoSuchMethodException)&#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NoSuchMethodError</span>(localNoSuchMethodException.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (ClassNotFoundException localClassNotFoundException)&#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NoClassDefFoundError</span>(localClassNotFoundException.getMessage());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Java的继承机制是<code>单继承，多接口</code>，代理类因为必须需要继承Proxy类，所以java的动态代理只能对接口进行处理，无法对一个class类进行处理。</p>
-<hr>
-<ul>
-<li><p>动态代理的必须是接口类，通过<code>动态生成一个接口实现类</code>来代理接口的方法调用(反射机制)</p>
-</li>
-<li><p>动态代理类会会由<code>java.lang.reflect.Proxy.ProxyClassFactory</code>来创建</p>
-</li>
-<li><p><code>ProxyClassFactory</code>会调用<code>sun.misc.ProxyGenerator</code>类生成该类的字节码，并且调用<code>java.lang.reflect.Proxy.defineClass()</code>方法将该类注册到JVM</p>
-</li>
-<li><p>该类继承于<code>Java.lang.reflect.Proxy</code>并且实现了需要被代理的接口类</p>
-</li>
-</ul>
-<p>总的来说，<code>java.lang.reflect.Proxy</code>类是通过创建一个新的<code>Java类</code>–<code>com.sun.proxy.$ProxyXXX</code>的方式来实现类方法代理功能的。</p>
-<p>需要注意的是，如果动过动态代理生成了多个动态代理类，新生成的类名中的 <code>0</code> 会自增，如 <code>com.sun.proxy.$Proxy0/$Proxy1/$Proxy2</code>。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://m1ntice.github.io/2024/06/04/test/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -485,6 +340,104 @@
 
 <p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://m1ntice.github.io/2023/06/04/Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="M1ntIce's Blog">
+      <meta itemprop="description" content="M1ntIce">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | M1ntIce's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/06/04/Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/" class="post-title-link" itemprop="url">Java 动态代理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2023-06-04 21:06:20" itemprop="dateCreated datePublished" datetime="2023-06-04T21:06:20+08:00">2023-06-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-06-04 21:10:24" itemprop="dateModified" datetime="2024-06-04T21:10:24+08:00">2024-06-04</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="Word count in article">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">Word count in article: </span>
+      <span>5.2k</span>
+    </span>
+    <span class="post-meta-item" title="Reading time">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">Reading time &asymp;</span>
+      <span>5 mins.</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h3><p>代理模式是常见的一种java设计模式，特征是代理类和委托类实现了同样的接口，代理类主要负责委托类预处理，过滤，转发以及时候处理等等。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/06/04/Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
