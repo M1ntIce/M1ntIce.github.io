@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"m1ntice.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.20.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":true,"style":"mac"},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="简介Java语言是基于C语言实现的，Java的底层很多API都是通过JNI(Java Native Interface)来实现的。通过JNI接口C&#x2F;C++和Java可以互相调用–存在跨平台问题。Java可以通过JNI调用来弥补语言自身问题的不足。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JNI 安全基础">
+<meta property="og:url" content="https://m1ntice.github.io/2022/07/01/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="M1ntIce&#39;s Blog">
+<meta property="og:description" content="简介Java语言是基于C语言实现的，Java的底层很多API都是通过JNI(Java Native Interface)来实现的。通过JNI接口C&#x2F;C++和Java可以互相调用–存在跨平台问题。Java可以通过JNI调用来弥补语言自身问题的不足。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210402140856138.png">
+<meta property="article:published_time" content="2022-07-01T14:08:50.000Z">
+<meta property="article:modified_time" content="2024-06-04T14:22:11.350Z">
+<meta property="article:tag" content="Java安全">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210402140856138.png">
+
+
+<link rel="canonical" href="https://m1ntice.github.io/2022/07/01/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://m1ntice.github.io/2022/07/01/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/","path":"2022/07/01/JNI-安全基础/JNI-安全基础/","title":"JNI 安全基础"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JNI 安全基础 | M1ntIce's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">M1ntIce's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">M1ntIce</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI-%E5%AE%9A%E4%B9%89native%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">JNI-定义native方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI-%E7%94%9F%E6%88%90%E7%B1%BB%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">JNI-生成类头文件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%91%BD%E5%90%8D%E5%BC%BA%E5%88%B6%E6%80%A7"><span class="nav-number">3.0.1.</span> <span class="nav-text">头文件命名强制性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">JNI 数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Java%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.0.1.</span> <span class="nav-text">Java基本数据类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Java%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.0.2.</span> <span class="nav-text">Java引用类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.0.3.</span> <span class="nav-text">对引用类型的操作</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#String%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.0.3.1.</span> <span class="nav-text">String类型的处理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.0.3.2.</span> <span class="nav-text">数组类型的处理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8E%9F%E7%94%9F%E8%AF%AD%E8%A8%80%E8%AE%BF%E9%97%AEjava%E5%8F%98%E9%87%8F"><span class="nav-number">4.0.3.3.</span> <span class="nav-text">原生语言访问java变量</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8E%9F%E7%94%9F%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8java%E6%96%B9%E6%B3%95"><span class="nav-number">4.0.3.4.</span> <span class="nav-text">原生语言调用java方法</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI-C-C-%E6%9C%AC%E5%9C%B0%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="nav-number">5.</span> <span class="nav-text">JNI C&#x2F;C++本地命令执行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">5.0.1.</span> <span class="nav-text">编译</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description">M1ntIce</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://m1ntice.github.io/2022/07/01/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/JNI-%E5%AE%89%E5%85%A8%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="M1ntIce's Blog">
+      <meta itemprop="description" content="M1ntIce">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JNI 安全基础 | M1ntIce's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JNI 安全基础
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-07-01 22:08:50" itemprop="dateCreated datePublished" datetime="2022-07-01T22:08:50+08:00">2022-07-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2024-06-04 22:22:11" itemprop="dateModified" datetime="2024-06-04T22:22:11+08:00">2024-06-04</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="Word count in article">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">Word count in article: </span>
+      <span>6k</span>
+    </span>
+    <span class="post-meta-item" title="Reading time">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">Reading time &asymp;</span>
+      <span>5 mins.</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>Java语言是基于C语言实现的，Java的底层很多API都是通过<code>JNI(Java Native Interface)</code>来实现的。通过<code>JNI</code>接口C&#x2F;C++和Java可以互相调用–存在跨平台问题。Java可以通过JNI调用来弥补语言自身问题的不足。</p>
+<span id="more"></span>
+
+<h3 id="JNI-定义native方法"><a href="#JNI-定义native方法" class="headerlink" title="JNI-定义native方法"></a>JNI-定义native方法</h3><p>在Java中如果需要调用native方法那么需要在类中先定义一个native方法</p>
+<p>eg：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.anbai.sec.cmd;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Command_Execute</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">native</span> String <span class="title function_">exec</span><span class="params">(String cmd)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//适用native关键字定义一个类似于接口的方法即可</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="JNI-生成类头文件"><a href="#JNI-生成类头文件" class="headerlink" title="JNI-生成类头文件"></a>JNI-生成类头文件</h3><p>编写好<code>Command_Execute.java</code>之后，编译生成C语言头文件</p>
+<p>具体的步骤：</p>
+<ol>
+<li>使用<code>javac</code>编译成class文件<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac ./Command_Execute.java</span><br></pre></td></tr></table></figure>
+2.生成头文件<br>这里需要注意jdk的版本，如果jdk的版本<code>&gt;=10</code>，那么就使用以下的命令：<code>javac</code> + <code>-h</code>生成头文件；否则的话，使用<code>javah</code>的命令生成头文件</li>
+</ol>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -cp . com/anbai/sec/<span class="built_in">cmd</span>/Command_Execute.java -h com/anbai/sec/<span class="built_in">cmd</span>/</span><br></pre></td></tr></table></figure>
+<p>执行的结果为：<br><img src="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210402140856138.png" alt="image-20210402140856138"></p>
+<p><code>com_anbai_sec_cmd_Command_Execute.h</code>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* DO NOT EDIT THIS FILE - it is machine generated */</span></span><br><span class="line">#include &lt;jni.h&gt;</span><br><span class="line"><span class="comment">/* Header for class com_anbai_sec_cmd_Command_Execute */</span></span><br><span class="line"></span><br><span class="line">#ifndef _Included_com_anbai_sec_cmd_Command_Execute</span><br><span class="line">#define _Included_com_anbai_sec_cmd_Command_Execute</span><br><span class="line">#ifdef __cplusplus</span><br><span class="line">extern <span class="string">&quot;C&quot;</span> &#123;</span><br><span class="line">#endif</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     com_anbai_sec_cmd_Command_Execute</span></span><br><span class="line"><span class="comment"> * Method:    exec</span></span><br><span class="line"><span class="comment"> * Signature: (Ljava/lang/String;)Ljava/lang/String;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">JNIEXPORT jstring JNICALL <span class="title function_">Java_com_anbai_sec_cmd_Command_1Execute_exec</span></span><br><span class="line">  <span class="params">(JNIEnv *, jclass, jstring)</span>;</span><br><span class="line"></span><br><span class="line">#ifdef __cplusplus</span><br><span class="line">&#125;</span><br><span class="line">#endif</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+
+<h5 id="头文件命名强制性"><a href="#头文件命名强制性" class="headerlink" title="头文件命名强制性"></a>头文件命名强制性</h5><p>生成的头文件之中的函数命名方式是有非常强制性的约束的：</p>
+<p>在<code>Java_com_anbai_sec_cmd_Command_1Execute_exec.h</code>之中：</p>
+<ul>
+<li><code>Java_</code>是固定的前缀；</li>
+<li><code>com_anbai_sec_cmd_Command_1Execute</code>代表这Java的完整的包名：<code>com.anbai.sec.cmd.Command_Execute</code></li>
+<li><code>_exec</code>是表示的方法的名称</li>
+<li>在Java 层的下划线使用 <code>_1</code> 替代，这是因为 Native 层的下划线已经用来替代 Java 层的逗号了，所以 Java 层的下划线只能用 <code>_1</code> 表示了。</li>
+<li>剩下的<code>(JNIEnv *, jclass, jstring);</code>依次是：<ul>
+<li>JNI环境变量</li>
+<li>java调用的对象</li>
+<li>传入的参数类型<br>(这里的<code>JNIEnv</code>是一个指针类型，可以用它范围跟Java层的代码，他不能被跨进程被调用。)</li>
+</ul>
+</li>
+</ul>
+<h3 id="JNI-数据类型"><a href="#JNI-数据类型" class="headerlink" title="JNI 数据类型"></a>JNI 数据类型</h3><p>在Java之中，数据类型可以分为两类：一类是<code>基本数据类型</code>；一类是<code>引用类型</code></p>
+<p>基本数据类型：bool,char,byte,short,int,long,float,double</p>
+<p>引用类型：除了基本数据类型以外的所有数据类型都是引用类型，包括数组等等</p>
+<p>通过JNI的类型定义可以让java的基本数据类型和原生语言的基本类型相映射–即通过jni.h头文件，可以通过jni头文件中定义的类型在原生语言中实现操作java对象。</p>
+<h5 id="Java基本数据类型"><a href="#Java基本数据类型" class="headerlink" title="Java基本数据类型"></a>Java基本数据类型</h5><table>
+<thead>
+<tr>
+<th>Java类型</th>
+<th>JNI类型</th>
+<th>C&#x2F;C++类型</th>
+<th>大小</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Boolean</td>
+<td>Jboolean</td>
+<td>unsigned char</td>
+<td>无符号8位</td>
+</tr>
+<tr>
+<td>Byte</td>
+<td>Jbyte</td>
+<td>char</td>
+<td>有符号8位</td>
+</tr>
+<tr>
+<td>Char</td>
+<td>Jchar</td>
+<td>unsigned short</td>
+<td>无符号16位</td>
+</tr>
+<tr>
+<td>Short</td>
+<td>Jshort</td>
+<td>short</td>
+<td>有符号16位</td>
+</tr>
+<tr>
+<td>Int</td>
+<td>Jint</td>
+<td>int</td>
+<td>有符号32位</td>
+</tr>
+<tr>
+<td>Long</td>
+<td>Jlong</td>
+<td>long long</td>
+<td>有符号64位</td>
+</tr>
+<tr>
+<td>Float</td>
+<td>Jfloat</td>
+<td>float</td>
+<td>32位</td>
+</tr>
+<tr>
+<td>Double</td>
+<td>Jdouble</td>
+<td>double</td>
+<td>64位</td>
+</tr>
+</tbody></table>
+<h5 id="Java引用类型"><a href="#Java引用类型" class="headerlink" title="Java引用类型"></a>Java引用类型</h5><p>对于java的引用类型，他的内部数据结构并未对外公开，因此无法一一映射，但是在JNI类型中有一个<code>jobject类型</code>，基本是涵盖了大部分的引用类型。</p>
+<p>以下列出的引用类型隐映射表，所对应的原生类型这一类对象全部都是jobject的子类。</p>
+<table>
+<thead>
+<tr>
+<th>Java 类型</th>
+<th>原生类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>java.lang.Class</td>
+<td>jclass</td>
+</tr>
+<tr>
+<td>java.lang.Throwable</td>
+<td>jthrowable</td>
+</tr>
+<tr>
+<td>java.lang.String</td>
+<td>jstring</td>
+</tr>
+<tr>
+<td>Other objects</td>
+<td>jobjects</td>
+</tr>
+<tr>
+<td>java.lang.Objects[]</td>
+<td>jobjectArray</td>
+</tr>
+<tr>
+<td>boolean[]</td>
+<td>jbooleanArray</td>
+</tr>
+<tr>
+<td>byte[]</td>
+<td>jbyteArray</td>
+</tr>
+<tr>
+<td>char[]</td>
+<td>jcharArray</td>
+</tr>
+<tr>
+<td>short[]</td>
+<td>jshortArray</td>
+</tr>
+<tr>
+<td>int[]</td>
+<td>jintArray</td>
+</tr>
+<tr>
+<td>long[]</td>
+<td>jlongArray</td>
+</tr>
+<tr>
+<td>float[]</td>
+<td>jfloatArray</td>
+</tr>
+<tr>
+<td>double[]</td>
+<td>jdoubleArray</td>
+</tr>
+<tr>
+<td>Other arrays</td>
+<td>Jarray</td>
+</tr>
+</tbody></table>
+<h5 id="对引用类型的操作"><a href="#对引用类型的操作" class="headerlink" title="对引用类型的操作"></a>对引用类型的操作</h5><p>由于引用类型对于原生语言不是公开的，因此在使用的时候需要进行转换</p>
+<h6 id="String类型的处理"><a href="#String类型的处理" class="headerlink" title="String类型的处理"></a>String类型的处理</h6><ul>
+<li>将C的字符串转换为java字符串：可以将c风格字符串转换为jni类型的jstring然后返回给java对象使用。如果是Unicode编码则使用NewString,UTF编码则用NewStringUTF函数。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;NewStringUTF(<span class="string">&quot;C的字符串&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在原生语言中使用java字符串</li>
+</ul>
+<p>java字符串在原生语言中被当作引用类型来处理，因此使用之前必须转换为<code>char数组类型</code>。如果是<code>Unicode</code>的编码使用<code>GetStringChars</code>，如果是<code>UTF编码</code>则使用<code>GetStringUTFChars</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;span style=<span class="string">&quot;white-space:pre&quot;</span>&gt;	&lt;/span&gt;const <span class="type">char</span> *p;</span><br><span class="line"><span class="comment">//定义一个char指针变量</span></span><br><span class="line">	<span class="type">jboolean</span> <span class="variable">isCopy</span> <span class="operator">=</span> JNI_TRUE;</span><br><span class="line"><span class="comment">//JNI类型定义的两个常量代表jboolean的真假：JNI_TRUE--真；JNI_FALSE--假</span></span><br><span class="line">	p = env-&gt;GetStringUTFChars(param, &amp;isCopy);</span><br><span class="line"><span class="comment">//GetStringUTFChars方法返回一个指向char数组首地址的指针</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>释放字符串</li>
+</ul>
+<p>释放的方法：如果是Unicode编码使用releaseStringChars；如果是UTF编码使用releaseStringUTFChars。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;ReleaseStringChars(javaString, p);</span><br><span class="line"></span><br><span class="line">env-&gt;ReleaseStringUTFChars(javaString, p);</span><br><span class="line"><span class="comment">//javaString指的是java字符串对象，p指的是签名创建的字符指针对象。</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="数组类型的处理"><a href="#数组类型的处理" class="headerlink" title="数组类型的处理"></a>数组类型的处理</h6><p>由于数组也被当作引用对象，所以JNI提供函数对于数组的处理</p>
+<ul>
+<li><p>创建java数组</p>
+<p>  通过<code>New&lt;type&gt;Array</code>函数就可以在原生语言中创建java数组，type指的是Bool,Int,Float等基本数据类型。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jintArray a= env-&gt;NewIntArray(<span class="number">10</span>);    <span class="comment">//其中10是数组的容量</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>访问java数组元素<br>通过<code>Get&lt;type&gt;ArrayRegion</code>函数就可以将java数组元素复制到一个C数组中，从而可以在原生语言中对其进行操作。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jint nativeArray[<span class="number">10</span>];</span><br><span class="line"><span class="comment">//将java数组转换为c数组</span></span><br><span class="line">env-&gt;GetIntArrayRegion(array, <span class="number">0</span>, <span class="number">10</span>, nativeArray)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>这样，我们就可以操作nativeArray来访问java数组的元素了。注意这里是复制的方式，<strong>虽然访问的内容是一样的，但是他们所代表的对象不是同一个对象，而是java数组的一个副本。</strong>  </p>
+<ul>
+<li>将C数组复制到java数组</li>
+<li>由于通过<code>Get&lt;type&gt;ArrayRegion</code>函数获取的只是java数组的副本，因此任何对c数组的操作都不会影响java数组，而如果希望将c数组操作后的结果复制会Java数组，就需要使用<code>set&lt;type&gt;ArrayRegion</code>函数。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;SetIntArrayRegion(array, <span class="number">0</span>, <span class="number">10</span>, nativeArray);</span><br></pre></td></tr></table></figure></li>
+<li>如果指针操作java数组<br>通过<code>Get&lt;type&gt;ArrayElements</code>函数就可以获取一个指向java数组的指针    <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jint *pNative;</span><br><span class="line">jboolean isCopy=JNI_TRUE;</span><br><span class="line">pNative=env-&gt;GetIntArrayElements(array,&amp;isCopy);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ul>
+<li>释放指针对象：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;ReleaseIntArrayElements(array,pnative,<span class="number">0</span>);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>三种释放模式： </p>
+<ul>
+<li>0–将内容复制回来并且释放数组</li>
+<li>JNI_COMMIT–将内容复制回来但是不释放原生数组，一般于周期性地更新一个数组</li>
+<li>JNI_ABORT–不用将内容复制回来并且释放原生数组</li>
+</ul>
+<h6 id="原生语言访问java变量"><a href="#原生语言访问java变量" class="headerlink" title="原生语言访问java变量"></a>原生语言访问java变量</h6><p>在java之中，类有两个域，分别是静态域和实例域，一个类有很多实力域，但是这多个实例域都对应者一个静态域。</p>
+<ul>
+<li><p>根据调用对象获取类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jclass clazz;</span><br><span class="line">clazz = env-&gt;GetObjectClass(jTiss);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取域id</p>
+</li>
+<li><p>获取java对象的实例域或者静态域，除了知道<code>所属的类</code>以外，还必须知道它的<code>域id</code>。</p>
+<ul>
+<li>实例域：</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jfieldID fieldID;</span><br><span class="line">fieldID = env-&gt;GetFieldID(clazz, <span class="string">&quot;instanceString&quot;</span>, <span class="string">&quot;Ljava/lang/String;&quot;</span>);</span><br><span class="line">    <span class="comment">//第二个参数表示java类中的实例变量名称；第三个参数是方法描述符</span></span><br></pre></td></tr></table></figure>
+<pre><code>* 实力域
+</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">jfieldID fieldID;</span><br><span class="line">fieldID = env-&gt;GetStaticFieldID(clazz, <span class="string">&quot;staticString&quot;</span>,</span><br><span class="line">			<span class="string">&quot;Ljava/lang/String;&quot;</span>);</span><br><span class="line"><span class="comment">//参数域实例域的相同</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>获取java变量的值</p>
+<ul>
+<li>实例变量  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jstring string;</span><br><span class="line">string = (jstring) env-&gt;GetObjectField(jTiss, fieldID);</span><br></pre></td></tr></table></figure></li>
+<li>静态变量  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jstring string;</span><br><span class="line">string = (jstring) env-&gt;GetStaticObjectField(clazz, fieldID);</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h6 id="原生语言调用java方法"><a href="#原生语言调用java方法" class="headerlink" title="原生语言调用java方法"></a>原生语言调用java方法</h6><ul>
+<li><p>获取实例方法id</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">jclass</span> <span class="variable">clazz</span> <span class="operator">=</span> env-&gt;GetObjectClass(jThis);</span><br><span class="line"><span class="type">jmethodID</span> <span class="variable">methodID</span> <span class="operator">=</span> env-&gt;GetMethodID(clazz, <span class="string">&quot;getInstanceStringFromJava&quot;</span>,</span><br><span class="line">			<span class="string">&quot;()Ljava/lang/String;&quot;</span>);</span><br><span class="line"><span class="comment">//第二个参数是方法名称</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取静态方法id</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">jclass</span> <span class="variable">clazz</span> <span class="operator">=</span> env-&gt;GetObjectClass(jThis);</span><br><span class="line"><span class="type">jmethodID</span> <span class="variable">methodID</span> <span class="operator">=</span> env-&gt;GetStaticMethodID(clazz,<span class="string">&quot;getStaticStringFromJava&quot;</span>, <span class="string">&quot;()Ljava/lang/String;&quot;</span>);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用实例方法</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;CallObjectMethod(jThis, methodID);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用静态方法</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env-&gt;CallStaticObjectMethod(clazz, methodID);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="JNI-C-C-本地命令执行"><a href="#JNI-C-C-本地命令执行" class="headerlink" title="JNI C&#x2F;C++本地命令执行"></a>JNI C&#x2F;C++本地命令执行</h3><p>在生成好了头文件之后，使用C、C++编写函数的最终实现</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;com_anbai_sec_cmd_Command_Execute.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function">JNIEXPORT jstring JNICALL <span class="title">Java_com_anbai_sec_cmd_Command_1Execute_exec</span></span></span><br><span class="line"><span class="function">  <span class="params">(JNIEnv *, jclass, jstring)</span></span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(str!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">    jboolean jsCopy;</span><br><span class="line">    <span class="comment">//将Jstring参数转成char指针</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *cmd = env-&gt;<span class="built_in">GetStringUTFChars</span>(str, &amp;jsCopy);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//使用popen函数执行系统命令</span></span><br><span class="line">    FILE *fd = <span class="built_in">poen</span>(cmd, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(fd!=<span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="comment">//返回结果字符串</span></span><br><span class="line">        string result;</span><br><span class="line">        </span><br><span class="line">        <span class="type">char</span> buf[<span class="number">128</span>];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(<span class="built_in">fgets</span>(buf, <span class="built_in">sizeof</span>(buf), fd) != <span class="literal">NULL</span>)&#123;</span><br><span class="line">            <span class="comment">//拼接读取到的结果到result</span></span><br><span class="line">            result += buf;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//关闭popen</span></span><br><span class="line">        <span class="built_in">pclose</span>(fd);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> env-&gt;<span class="built_in">NewStringUTF</span>(<span class="string">&quot;result.c_str()&quot;</span>);</span><br><span class="line">   		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h5><ul>
+<li>使用<code>cl命令</code>编译dll <figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cl /c com_anbai_sec_cmd_Command_Execute.cpp</span><br></pre></td></tr></table></figure></li>
+<li>使用<code>gcc命令</code>编译，编译完成就可以完成动态链接库了</li>
+</ul>
+<p>在一般的情况下，需要严格按照JNI要求去命名文件名并且把链接库放在Java的动态链接库目录。当然，除此之外也可以自定义库名称和路径。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E5%AE%89%E5%85%A8/" rel="tag"># Java安全</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/05/23/%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/Java%20%E5%8F%8D%E5%B0%84%E6%9C%BA%E5%88%B6/" rel="prev" title="Java 反射机制">
+                  <i class="fa fa-angle-left"></i> Java 反射机制
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/07/31/Java-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/Java%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="next" title="Java 反序列化">
+                  Java 反序列化 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder"></span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>Word count total: </span>
+    <span title="Word count total">45k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>Reading time total &asymp;</span>
+    <span title="Reading time total">41 mins.</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>
