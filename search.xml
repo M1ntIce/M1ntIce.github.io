@@ -754,6 +754,8 @@
     <title>缓存投毒</title>
     <url>/2024/06/04/%E7%BC%93%E5%AD%98%E6%8A%95%E6%AF%92/%E7%BC%93%E5%AD%98%E6%8A%95%E6%AF%92/</url>
     <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><h3 id="缓存投毒的原理"><a href="#缓存投毒的原理" class="headerlink" title="缓存投毒的原理"></a>缓存投毒的原理</h3><p>发送导致有害响应的请求，将该请求保存在缓存服务之中并且提供给其它的用户</p>
+<span id="more"></span>
+
 <p><img src="https://ttpfx.oss-cn-chengdu.aliyuncs.com/img/image-20210518164517467.png" alt="image-20210516203552981"></p>
 <hr>
 <h6 id="缓存投毒与缓存欺骗的区别"><a href="#缓存投毒与缓存欺骗的区别" class="headerlink" title="缓存投毒与缓存欺骗的区别"></a>缓存投毒与缓存欺骗的区别</h6><ul>
