@@ -109,7 +109,7 @@
   </entry>
   <entry>
     <title>Java 构造函数</title>
-    <url>/2024/05/21/Java-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/Java-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/</url>
+    <url>/2023/05/21/Java-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/Java-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0/</url>
     <content><![CDATA[<h4 id="创建java构造函数的规则"><a href="#创建java构造函数的规则" class="headerlink" title="创建java构造函数的规则"></a>创建java构造函数的规则</h4><ul>
 <li>构造函数名称必须和类名称相同</li>
 <li>构造函数必须没有显式返回类型<span id="more"></span></li>
